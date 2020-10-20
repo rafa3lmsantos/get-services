@@ -1,193 +1,57 @@
-# ==============================================================================================
-# CAMINHO DO REPORT
+$servidores = 
+'WSADALP1',
+'WSADHUN1',
+'WSADRJ1',
+'WSADSP2',
+'WSPSNY1',
+'WSFDMPRD2',
+'WSFDMPRD3',
+'WSFDMPRD4',
+'WSSQLPRD1',
+'WSWASPRD',
+'WSBVRAP1',
+'WSCAPHUN1',
+'WSDPHUN1',
+'WSFSALP1',
+'WSFSHUN1',
+'WSPSALP2',
+'WSSCCMPRD1',
+'WSSECSP1',
+'PWDC1ALP',
+'PWFS2BVR',
+'WSRPAPRD01',
+'WSRPAPRD02',
+'WSRPAPRD03',
+'WSRPAAPP04',
+'WSRPABD05',
+'WSRPAPRD06',
+'WSCCTPRD',
+'WSWASHML',
+'WSFDMHMP',
+'WSFDMDSP',
+'WSSQLHML',
+'WSTEF01',
+'PWGDLSP',
+'PWHP1SP',
+'PWVCB3SP',
+'PWVCB4SP'
 
-$Report = ".\WindowsServices.html"
 
-# ==============================================================================================
-# Definir cores para O fundo da célula da tabela
+foreach($servidores in $servidores){
 
-$redColor = "#FF0000"
-$orangeColor = "#FBB917"
-$greenColor = "#00FF00"
-$yellowColor = "#ffff00"
-$whiteColor = "#FFFFFF"
-$grayColor = "#b4b5b3"
+$teste = Test-Connection -ComputerName $servidores -Count 1 -Quiet
+    if($teste -eq "$true"){
 
-# ==============================================================================================
-# CRIAR E ESCREVER O HTML Header DO REPORT
-
-$header = "
-		<html>
-		<head>
-		<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
-		<title>Agentes Essenciais</title>
-		<STYLE TYPE='text/css'>
-		<!--
-		td {
-			font-family: Tahoma;
-			font-size: 11px;
-			border-top: 1px solid #999999;
-			border-right: 1px solid #999999;
-			border-bottom: 1px solid #999999;
-			border-left: 1px solid #999999;
-			padding-top: 0px;
-			padding-right: 0px;
-			padding-bottom: 0px;
-			padding-left: 0px;
-		}
-		body {
-			margin-left: 5px;
-			margin-top: 5px;
-			margin-right: 0px;
-			margin-bottom: 10px;
-			table {
-			border: thin solid #000000;
-		}
-		-->
-		</style>
-		</head>
-		<body>
-		<table width='100%'>
-		<tr bgcolor='#CCCCCC'>
-		<td colspan='7' height='25' align='center'>
-		<font face='tahoma' color='#003399' size='4'><strong>Serviços Essenciais</strong></font>
-		</td>
-		</tr>
-		</table>
-"
-
-# ==============================================================================================
-# ADICIONANDO INFORMAÇÕES DO REPORT
-
-Add-Content $Report $header
-
-# ==============================================================================================
-# CRIAR E ESCREVER O TÍTULO DA TABELA PARA O REPORT
-
- $tableHeader = "
- <table width='100%'><tbody>
-	<tr bgcolor=#CCCCCC>
-    <td width='10%' align='center'>Servidor</td>
-    <td width='10%' align='center'>Sistema Operacional</td>
-    <td width='10%' align='center'>IEM</td>
-    <td width='10%' align='center'>Salt</td>
-    <td width='10%' align='center'>Nagios</td>
-    <td width='10%' align='center'>Nimsoft</td>
-    <td width='10%' align='center'>Net Backup</td>
-    <td width='10%' align='center'>TSM Client</td>
     
-    </tr>
-"
-
-
-# ==============================================================================================
-# INICIO DOS COMANDOS
-
-$computer = Get-Content -Path ".\Servers.txt"
-
-
-foreach($computer in $computer){
-	
-Add-Content $Report $tableHeader
-Add-Content $Report $dataRow
-
-
-$CPName = Get-WmiObject -Class Win32_ComputerSystem -ComputerName $computer -Namespace "ROOT\cimv2" -ErrorAction SilentlyContinue | Select -ExpandProperty Name
-$NomeSO = Get-WmiObject -Class Win32_OperatingSystem -ComputerName $computer -ErrorAction SilentlyContinue | Select -ExpandProperty Caption
-$GetIEM = Get-Service -Name "BESClient" -computername $computer -ErrorAction SilentlyContinue | Select Status
-$GetSALT = Get-Service -Name "salt-minion" -computername $computer -ErrorAction SilentlyContinue | Select Name, Status
-$GetNagios = Get-Service -Name "NSClient*" -computername $computer -ErrorAction SilentlyContinue | Select Status
-$GetNinsoft = Get-Service -Name "NimbusWatcherService" -computername $computer -ErrorAction SilentlyContinue | Select Status
-$GetNetBackup = Get-Service -Name "NetBackup*" -computername $computer -ErrorAction SilentlyContinue | Select Status
-$GetTSM = Get-Service -Name "TSM*" -computername $computer -ErrorAction SilentlyContinue | Select Status
-  
-        if ($GetIEM -match "Running") {
-        ($IEM = "SIM") } Else {
-        ($IEM = "NAO")}
-
-        if ($IEM -eq "SIM"){$color_IEM = $greenColor}
-        if ($IEM -eq "NAO"){$color_IEM = $yellowColor}
-        
-        if ($GetSALT -match "Running") {
-        ($SALT = "SIM") } Else {
-        ($SALT = "NAO")}
-       
-        if ($SALT -eq "SIM"){$color_SALT = $greenColor}
-        if ($SALT -eq "NAO"){$color_SALT = $yellowColor}
-
-        if ($NomeSO -eq "Microsoft(R) Windows(R) Server 2003, Standard Edition" -and "Microsoft(R) Windows(R) Server 2003, Enterprise Edition"){
-           ($SALT = "S.O Não Compatível")}
-
-        if ($SALT -eq "S.O Não Compatível"){$color_SALT = $redColor}
-        
-              
-        if ($GetNagios -match "Running") {
-        ($Nagios = "SIM") } Else {
-        ($Nagios = "NAO")}
-
-        if ($Nagios -eq "SIM"){$color_Nagios = $greenColor}
-        if ($Nagios -eq "NAO"){$color_Nagios = $yellowColor}
-
-
-        if ($GetNinsoft -match "Running") {
-        ($Ninsoft = "SIM") } Else {
-        ($Ninsoft = "NAO")}
-
-        if ($Ninsoft -eq "SIM"){$color_Nimsoft = $greenColor}
-        if ($Ninsoft -eq "NAO"){$color_Nimsoft = $yellowColor}
-
-        if ($GetTSM -match "Running") {
-        ($TSM = "SIM") } Else {
-        ($TSM = "NAO")}
-
-        if ($TSM -eq "SIM"){$color_TSM = $greenColor}
-        if ($TSM -eq "NAO"){$color_TSM = $yellowColor}
-
-        if ($GetNetBackup -match "Running") {
-        ($NetBackup = "SIM") } Else {
-        ($NetBackup = "NAO")}
-
-        if ($NetBackup -eq "SIM"){$color_NetBackup = $greenColor}
-        if ($NetBackup -eq "NAO"){$color_NetBackup = $yellowColor}
-     
- # CRIANDO LINHAS DE DADOS DA TABELA DENTRO DO FOREACH
- 
- $dataRow = "
-		<tr>
-        <td width='10%' align='center' bgcolor=`'$color_CPNAME`'>$CPName</td>
-        <td width='10%' align='center' bgcolor=`'$color_NomeSO`'>$NomeSO</td>
-    	<td width='10%' align='center' bgcolor=`'$color_IEM`'>$IEM</td>
-        <td width='10%' align='center' bgcolor=`'$color_SALT`'>$Salt</td>
-        <td width='10%' align='center' bgcolor=`'$color_Nagios`'>$Nagios</td>
-        <td width='10%' align='center' bgcolor=`'$color_Nimsoft`'>$Ninsoft</td>
-        <td width='10%' align='center' bgcolor=`'$color_NetBackup`'>$NetBackup</td>
-        <td width='10%' align='center' bgcolor=`'$color_TSM`'>$TSM</td>
-        </tr>
-	    
-		"
-       
+Get-WmiObject -Class Win32_ComputerSystem -ComputerName $servidores -Namespace "ROOT\cimv2" -ErrorAction SilentlyContinue | Select -ExpandProperty Name
+Get-WmiObject -Class Win32_OperatingSystem -ComputerName $servidores -ErrorAction SilentlyContinue | Select -ExpandProperty Caption
+Get-Service -Name "salt-minion" -computername $servidores -ErrorAction SilentlyContinue | Select Name, Status
+Get-Service -Name "NSClient*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "NimbusWatcherService" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "ntrtscan" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "NetBackup*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "TSM*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
 }
 
-# FIM DOS COMANDOS
-
-# ==============================================================================================
-
-# PROPRIEDADES DO E-MAIL
-
-$From = "nome@empresa.com"
-$To = "nome@empresa.com"
-$SMTPServer = "hostname ou IP"
-$Body = Get-Content -Path ".\WindowsServices.html" | Out-String
-
-Send-MailMessage `
-     -From $From `
-     -To $To `
-     -Subject "Serviços Essenciais" `
-     -BodyAsHtml `
-     -Attachment ".\WindowsServices.html" `
-     -Body $Body `
-     -SmtpServer $SMTPServer `
-     -Encoding UTF8
-
-# ==============================================================================================
-
+else{Write-Host Falha na comunicação: $servidores -ForegroundColor Red}
+}
