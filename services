@@ -1,0 +1,58 @@
+$servidores = 
+'WSADALP1',
+'WSADHUN1',
+'WSADRJ1',
+'WSADSP2',
+'WSPSNY1',
+'WSFDMPRD2',
+'WSFDMPRD3',
+'WSFDMPRD4',
+'WSSQLPRD1',
+'WSWASPRD',
+'WSBVRAP1',
+'WSCAPHUN1',
+'WSDPHUN1',
+'WSFSALP1',
+'WSFSHUN1',
+'WSPSALP2',
+'WSSCCMPRD1',
+'WSSECSP1',
+'PWDC1ALP',
+'PWFS2BVR',
+'WSRPAPRD01',
+'WSRPAPRD02',
+'WSRPAPRD03',
+'WSRPAAPP04',
+'WSRPABD05',
+'WSRPAPRD06',
+'WSCCTPRD',
+'WSWASHML',
+'WSFDMHMP',
+'WSFDMDSP',
+'WSSQLHML',
+'WSTEF01',
+'PWGDLSP',
+'PWHP1SP',
+'PWVCB3SP',
+'PWVCB4SP'
+
+
+
+foreach($servidores in $servidores){
+
+$teste = Test-Connection -ComputerName $servidores -Count 1 -Quiet
+    if($teste -eq "$true"){
+
+    
+Get-WmiObject -Class Win32_ComputerSystem -ComputerName $servidores -Namespace "ROOT\cimv2" -ErrorAction SilentlyContinue | Select -ExpandProperty Name
+Get-WmiObject -Class Win32_OperatingSystem -ComputerName $servidores -ErrorAction SilentlyContinue | Select -ExpandProperty Caption
+Get-Service -Name "salt-minion" -computername $servidores -ErrorAction SilentlyContinue | Select Name, Status
+Get-Service -Name "NSClient*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "NimbusWatcherService" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "ntrtscan" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "NetBackup*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+Get-Service -Name "TSM*" -computername $servidores -ErrorAction SilentlyContinue | Select Status
+}
+
+else{Write-Host Falha na comunicação: $servidores -ForegroundColor Red}
+}
